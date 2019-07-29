@@ -1,6 +1,8 @@
 # Original-Coder-Libraries
 Libraries for .NET that provide a wide selection of features and capabilities.
 
+Please check out my profressional blog at https://www.originalcoder.dev
+
 I've been building reusable libraries and freameworks since the 1990s.  Since starting work in C# about 14 years ago I've built up a rather massive collection of libraries that I've started the process of converting into open source.  This project will be where the open source versions of those libraries reside.
 
 Now now this should be considered an Alpha release.  I'm mostly uploading at this point to get the repository estabulished and to start figuring out the best way to manage this and have binaries posted on NuGet.
