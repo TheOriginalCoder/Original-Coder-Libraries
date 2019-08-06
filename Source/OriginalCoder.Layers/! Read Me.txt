@@ -1,0 +1,26 @@
+﻿Original Coder - Layer Library
+-------------------------------------------------------------------------------
+Visit the Original Coder Blog at http://OriginalCoder.dev
+Hosted at https://github.com/TheOriginalCoder/Original-Coder-Libraries
+-------------------------------------------------------------------------------
+Copyright (C) 2005-2019 by James B. Higgins
+Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 (29 June 2007)
+-------------------------------------------------------------------------------
+
+Original-Coder-Libraries
+Libraries for .NET that provide a wide selection of features and capabilities.
+
+Please check out my profressional blog at https://www.originalcoder.dev
+
+I've been building reusable libraries and freameworks since the 1990s. Since starting work in C# about 14 years ago 
+I've built up a rather massive collection of libraries that I've started the process of converting into open source. 
+This project will be where the open source versions of those libraries reside.
+
+Now now this should be considered an Alpha release. I'm mostly uploading at this point to get the repository 
+estabulished and to start figuring out the best way to manage this and have binaries posted on NuGet.
+
+Much of the code I'll be including in the iniital alpha release is based on very clean and well documented library 
+code I've been using for years. But I've done a bit of refactoring and cleaning up in addition to modernizing the 
+code. A lot of the original code was written some years ago and didn't take advantage of newer C# features. I have 
+not yet transferred or written unit tests so I'm not certain everything works at the moment. But it is good, high 
+quality code so you're welcome to give it a try and if you find any bugs either let me know of submit a fix.

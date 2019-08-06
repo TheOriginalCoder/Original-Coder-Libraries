@@ -8,29 +8,68 @@
 // Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3
 //=============================================================================
 
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
+// ReSharper disable ExplicitCallerInfoArgument
 namespace OriginalCoder.Common.Exceptions
 {
     /// <summary>
-    /// Base class for Timeout Exceptions thrown by Original Coder libraries.
+    /// Application exception used when a timeout has been exceeded.
     /// </summary>
     [PublicAPI]
     public class OcTimeoutException : OcApplicationException
     {
       #region Constructors 
 
-        public OcTimeoutException(string message)
-            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Timeout" : message)
+        public OcTimeoutException(string message, TimeSpan? elapsedTime = null, object resource = null, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Timeout" : message, callerName, callerFile, callerLine)
+        {
+            Resource = resource;
+            if (Resource != null)
+                PropertySet(nameof(Resource), Resource);
+            ElapsedTime = elapsedTime;
+            if (ElapsedTime.HasValue)
+                PropertySet(nameof(ElapsedTime), ElapsedTime.Value);
+        }
+
+        public OcTimeoutException(string message, Exception exception, TimeSpan? elapsedTime = null, object resource = null, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Timeout" : message, exception, callerName, callerFile, callerLine)
+        {
+            Resource = resource;
+            if (Resource != null)
+                PropertySet(nameof(Resource), Resource);
+            ElapsedTime = elapsedTime;
+            if (ElapsedTime.HasValue)
+                PropertySet(nameof(ElapsedTime), ElapsedTime.Value);
+        }
+
+        public OcTimeoutException(string message, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(message, properties, callerName, callerFile, callerLine)
         { }
 
-        public OcTimeoutException(System.Exception exception)
-            : base("Unspecified Timeout", exception)
+        public OcTimeoutException(string message, [CanBeNull] Exception exception, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+                : base(message, exception, properties, callerName, callerFile, callerLine)
         { }
 
-        public OcTimeoutException(string message, System.Exception exception)
-            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Timeout" : message, exception)
-        { }
+      #endregion
+
+        public object Resource { get; }
+        public TimeSpan? ElapsedTime { get; }
+
+      #region Summary
+
+        /// <inheritdoc />
+        public override string Summary => SummaryBuild("Timeout");
+
+        protected override void SummaryBuildProperties()
+        {
+            base.SummaryBuildProperties();
+            SummaryAddProperty("ElapsedTime");
+            SummaryAddProperty("Resource");
+        }
 
       #endregion
     }

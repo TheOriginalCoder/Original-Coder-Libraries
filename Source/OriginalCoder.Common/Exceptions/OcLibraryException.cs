@@ -8,8 +8,12 @@
 // Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3
 //=============================================================================
 
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
+// ReSharper disable ExplicitCallerInfoArgument
 namespace OriginalCoder.Common.Exceptions
 {
     /// <summary>
@@ -20,18 +24,30 @@ namespace OriginalCoder.Common.Exceptions
     {
       #region Constructors 
 
-        public OcLibraryException(string message)
-            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Library Error" : message)
+        public OcLibraryException(string message, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Library Error" : message, callerName, callerFile, callerLine)
         { }
 
-        public OcLibraryException(System.Exception exception)
-            : base("Unspecified Library Error", exception)
+        public OcLibraryException(string message, [CanBeNull] Exception exception, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Library Error" : message, exception, callerName, callerFile, callerLine)
         { }
 
-        public OcLibraryException(string message, System.Exception exception)
-            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Library Error" : message, exception)
+        public OcLibraryException(string message, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(message, properties, callerName, callerFile, callerLine)
+        { }
+
+        public OcLibraryException(string message, [CanBeNull] Exception exception, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null,
+            [CallerLineNumber] int callerLine = 0)
+            : base(message, exception, properties, callerName, callerFile, callerLine)
         { }
 
       #endregion
-    }
+ 
+      #region Summary
+
+        /// <inheritdoc />
+        public override string Summary => SummaryBuild("Library Error");
+
+      #endregion
+   }
 }

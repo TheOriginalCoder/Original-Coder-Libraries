@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OriginalCoder.Common\OriginalCoder.Common.csproj" />
+    <ProjectReference Include="..\OriginalCoder.Data\OriginalCoder.Data.csproj" />
+    <ProjectReference Include="..\OriginalCoder.Layers\OriginalCoder.Layers.csproj" />
+  </ItemGroup>
+
+</Project>

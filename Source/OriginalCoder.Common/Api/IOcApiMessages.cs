@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using OriginalCoder.Common.Interfaces.Properties;
 
 namespace OriginalCoder.Common.Api
 {
@@ -17,7 +18,7 @@ namespace OriginalCoder.Common.Api
     /// Specialized collection of <see cref="IOcApiMessage"/>
     /// </summary>
     [PublicAPI]
-    public interface IOcApiMessages : IReadOnlyList<IOcApiMessage>
+    public interface IOcApiMessages : IReadOnlyList<IOcApiMessage>, IStatusSummary
     {
       #region Content Information
 
@@ -30,6 +31,12 @@ namespace OriginalCoder.Common.Api
         /// Returns the number of messages in the collection that have a <see cref="OcApiMessageType"/> specified in <paramref name="apiMessageTypes"/>.
         /// </summary>
         int CountByType(params OcApiMessageType[] apiMessageTypes);
+
+        /// <summary>
+        /// Returns string containing message counts for <paramref name="messageTypes"/> that are greater than 0 and
+        /// prefixed by the total count if <paramref name="includeTotal"/> is true.
+        /// </summary>
+        string CountsByType(bool includeTotal, params OcApiMessageType[] messageTypes);
 
         /// <summary>
         /// Returns true if the collection contains any messages with a <see cref="OcApiMessageType"/> specified in <paramref name="apiMessageTypes"/>.

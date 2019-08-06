@@ -1,0 +1,57 @@
+﻿Original Coder - Layers Architecture Demonstration (2019-08-05 Alpha)
+---------------------------------------------------------------------------------------------------
+
+This library provides an early example of how the Original Coder Layer architecture would be 
+implemented and configured for a Web API system.
+
+Obviously the Layers is in very early alpha and this demo is incomplete, but it does provide a good 
+example of how this architecture would be configured and utilized.  Note how little code is required 
+to provide completel CRUD (Create, Read, Update & Delete) functionality for 3 separate resources 
+(Customer, Product and Order) via a Web API using DTOs.  Regardless of this being a demo this lack 
+of redundant boilerplate code makes implementing middle-tier systems much more efficient.  Plus less 
+code means less debugging and maintenance!  Once architects & developers become acustomed to how 
+this Layers architecture works they can be very productive.  Plus the architecture is designed to be 
+highly modular and flexible, it provides a great deal of benefits and pre-built capabilities but 
+does not prevent developers from adding any additional capabilities that may be needed by their system.
+
+There will be add-on libraries that provide standard implementations for specific technologies such as:
+- API Controllers for use with ASP.NET MVC.
+- Repository base classes that provide the implementation for working with Entity Framework.
+- Configuration support for having layer classes constructed by common IoC container implementations.
+- Authentication & Authorization for use with common libraries.
+
+Note that while not yet included, there will be a companion Original Coder library that provides
+standard HTML client capabilities for accessing Web APIs.  In particular it will have full support
+for the same set of CRUD operations making it really easy and efficient to create API clients
+for accessing middle-tier services built with the Layers library that expose CRUD endpoints.
+
+---------------------------------------------------------------------------------------------------
+According to Code Metrics it only takes about 85 lines of code to implement each of the 3 resources
+in this example (Customer, Product & Order).  Even though there is very little code required for
+typical implementaiton each of these resources gets a full set of CRUD API endpoints.
+
+Create endpoints:
+ - TKey Create(TEntity entity);
+ - TEntity CreateAndReturn(TEntity entity);
+
+Read endpoints:
+ - TEntity Get(TKey key);
+ - IReadOnlyList<TEntity> Get(IEnumerable<TKey> keys);
+ - IReadOnlyList<TEntity> Get();
+ - IReadOnlyList<TEntity> Get(int qtySkip, int qtyReturn, IReadOnlyList<(string columnName, bool ascending)> sortOrder = null);
+
+Updated endpoints:
+ - bool Update(TEntity entity);
+ - TEntity UpdateAndReturn(TEntity entity);
+
+Delete endpoints:
+ - bool Delete(TKey key);
+ - int Delete(IEnumerable<TKey> keys);
+
+---------------------------------------------------------------------------------------------------
+
+This standardized Layer architecture with built-in support for common CRUD operations is very handy,
+but no architecture or library is applicable to all projects.  The intent behind this design is to 
+provide a solid, full featured, reiable, felexible and reasonbly performant solution that can help
+with may middle-tier business sytem implementations.  But it will never be perfect nor applicable to
+all projects.

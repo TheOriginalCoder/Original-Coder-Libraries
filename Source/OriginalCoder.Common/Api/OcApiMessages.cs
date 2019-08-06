@@ -65,6 +65,9 @@ namespace OriginalCoder.Common.Api
 
         private readonly List<IOcApiMessage> _messages = new List<IOcApiMessage>();
 
+        /// <inheritdoc/>
+        public string StatusSummary => CountsByType(true, OcApiMessageType.Error, OcApiMessageType.AuthenticationFailure, OcApiMessageType.AuthorizationFailure, OcApiMessageType.ValidationFailure, OcApiMessageType.WarningSystem, OcApiMessageType.WarningDev, OcApiMessageType.WarningUser);
+
       #region Add Messages
 
         public void Add([CanBeNull] IOcApiMessage message)
@@ -89,6 +92,16 @@ namespace OriginalCoder.Common.Api
                 return;
 
             _messages.AddRange(messages.Where(m => m != null));
+        }
+
+        public void Add(OcApiMessageType type, [NotNull] string message)
+        {
+            _messages.Add(new OcApiMessage(type, message));
+        }
+
+        public void Add(OcApiMessageType type, [NotNull] string message, string referenceType, string referenceKey)
+        {
+            _messages.Add(new OcApiMessage(type, message, referenceType, referenceKey));
         }
 
       #endregion
@@ -131,6 +144,23 @@ namespace OriginalCoder.Common.Api
                 throw new ArgumentNullException(nameof(apiMessageTypes));
 
             return _messages.Count(m => apiMessageTypes.Contains(m.ApiMessageType));
+        }
+
+        public string CountsByType(bool includeTotal, params OcApiMessageType[] messageTypes)
+        {
+            if (messageTypes == null || messageTypes.Length == 0)
+                return "";
+
+            var result = "";
+            foreach (var messageType in messageTypes)
+            {
+                var count = CountByType(messageType);
+                if (count > 0)
+                    result = result + (result.Length == 0 ? "" : ", ") + $"{count} {messageType}";
+            }
+            if (includeTotal)
+                result = $"{Count} messages" + (result.Length == 0 ? "" : $" ({result})");
+            return result;
         }
 
         /// <inheritdoc/>

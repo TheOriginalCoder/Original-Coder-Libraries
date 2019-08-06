@@ -9,7 +9,7 @@
 //=============================================================================
 
 using JetBrains.Annotations;
-using OriginalCoder.Common.Interface.Property;
+using OriginalCoder.Common.Interfaces.Properties;
 
 namespace OriginalCoder.Common.Api
 {

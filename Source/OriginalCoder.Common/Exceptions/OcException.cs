@@ -9,66 +9,175 @@
 //=============================================================================
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using OriginalCoder.Common.Extensions;
+using OriginalCoder.Common.Interfaces.Properties;
 
 namespace OriginalCoder.Common.Exceptions
 {
     /// <summary>
-    /// Base class for Original Coder Exceptions (other than <see cref="OcApplicationException"/>).
+    /// Original Coder base class for Exceptions (other than <see cref="OcApplicationException"/>).
     /// </summary>
     [PublicAPI]
-    public class OcException : Exception
+    public class OcException : Exception, ISummary, IProperties
     {
       #region Constructors 
 
-        public OcException(string message)
+        public OcException(string message, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
             : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Error" : message)
-        { }
+        {
+            (CallerName, CallerFile, CallerLine) = PopulateCallerInfo(callerName, callerFile, callerLine);
+        }
 
-        public OcException(Exception exception)
-            : base("Unspecified Error", exception)
-        { }
-
-        public OcException(string message, Exception exception)
+        public OcException(string message, [CanBeNull] Exception exception, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
             : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Error" : message, exception)
-        { }
+        {
+            (CallerName, CallerFile, CallerLine) = PopulateCallerInfo(callerName, callerFile, callerLine);
+        }
+
+        public OcException(string message, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Error" : message)
+        {
+            (CallerName, CallerFile, CallerLine) = PopulateCallerInfo(callerName, callerFile, callerLine);
+            if (properties?.Count > 0)
+            {
+                foreach (var kv in properties.Where(kv => !string.IsNullOrWhiteSpace(kv.Key)))
+                    PropertySet(kv.Key, kv.Value);
+            }
+        }
+
+        public OcException(string message, [CanBeNull] Exception exception, IReadOnlyDictionary<string, object> properties, [CallerMemberName] string callerName = null, [CallerFilePath] string callerFile = null, [CallerLineNumber] int callerLine = 0)
+            : base(string.IsNullOrWhiteSpace(message) ? "Unspecified Error" : message, exception)
+        {
+            (CallerName, CallerFile, CallerLine) = PopulateCallerInfo(callerName, callerFile, callerLine);
+            if (properties?.Count > 0)
+            {
+                foreach (var kv in properties.Where(kv => !string.IsNullOrWhiteSpace(kv.Key)))
+                    PropertySet(kv.Key, kv.Value);
+            }
+        }
+
+        private (string callerName, string callerFile, int? callerLine) PopulateCallerInfo(string callerName, string callerFile, int? callerLine)
+        {
+            callerName = string.IsNullOrWhiteSpace(callerName) ? null : callerName;
+            callerFile = string.IsNullOrWhiteSpace(callerFile) ? null : Path.GetFileName(callerFile);
+            callerLine = callerLine <= 0 ? null : callerLine;
+            if (!string.IsNullOrWhiteSpace(callerName) && callerName.IndexOf("exception", StringComparison.OrdinalIgnoreCase) <= 0)
+            {
+                PropertySet(nameof(CallerName), callerName);
+                if (!string.IsNullOrWhiteSpace(callerFile))
+                    PropertySet(nameof(CallerFile), callerFile);
+                if (callerLine.HasValue)
+                    PropertySet(nameof(CallerLine), callerLine.Value);
+            }
+            return (callerName, callerFile, callerLine);
+        }
 
       #endregion
 
-      #region ToString
+        public string CallerName { get; }
+        public string CallerFile { get; }
+        public int? CallerLine { get; }
 
-        public static string ExceptionToString(Exception ex)
+      #region Summary
+
+        /// <inheritdoc />
+        public virtual string Summary => SummaryBuild("Error");
+
+        /// <summary>
+        /// Virtual method called to add properties that should be included when <see cref="SummaryBuild"/> is called to construct the <see cref="Summary"/> string.
+        /// Note that properties will appear in the string in reverse order (last property added will be first displayed, first added will be last displayed).
+        /// </summary>
+        protected virtual void SummaryBuildProperties()
+        { }
+
+        protected string SummaryBuild(string errorName)
         {
-            if (ex == null)
-                return "";
+            SummaryClearProperties();
+            SummaryBuildProperties();
+            var propertyText = OcString.ConcatenateReverse(Properties, _summaryProperties);
 
-            if (ex is AggregateException asAggregate)
-            {
-                return $"Aggregate containing {asAggregate.InnerExceptions.Count} exceptions";
-            }
-            return $"{ex.GetType().Name}: {ex.Message}";
-        }
-
-        public static string HierarchyToString(Exception ex)
-        {
-            if (ex == null)
-                return "";
-
-            var result = ExceptionToString(ex);
-            var next = ex.InnerException;
-            while (next != null)
-            {
-                result = result + " | INNER " + ExceptionToString(ex);
-                next = next.InnerException;
-            }
+            var result = (string.IsNullOrWhiteSpace(errorName) ? GetType().Name.Replace("Oc", "").Replace("Exception", "") + " Error" : errorName.Trim()) + ": ";
+            if (propertyText.Length > 0 && !string.IsNullOrWhiteSpace(Message))
+                result = result + propertyText + " -- " + Message;
+            else if (propertyText.Length > 0)
+                result = result + propertyText;
+            else
+                result = result + Message;
             return result;
         }
 
-        public override string ToString()
+        private List<(string name, object value)> _summaryProperties;
+
+        protected void SummaryClearProperties()
         {
-            return HierarchyToString(this);
+            _summaryProperties = new List<(string name, object value)>();
+        }
+
+        protected void SummaryAddProperty(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+                _summaryProperties.Add((name.Trim(), null));
+        }
+
+        protected void SummaryAddProperty(string name, object value)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return;
+
+            _summaryProperties.Add((name.Trim(), value));
+        }
+
+        protected void SummaryAddProperties(params (string name, object value)[] properties)
+        {
+            if (properties == null || properties.Length == 0)
+                return;
+
+            foreach (var property in properties)
+                SummaryAddProperty(property.name, property.value);
         }
 
       #endregion
+
+      #region Properties
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> Properties => _properties;
+        private Dictionary<string, object> _properties;
+
+        private static readonly HashSet<string> _excludeObjectProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Data", "InnerException", "Message", "StackTrace", "Source" };
+
+        protected void PropertySet(string name, object value)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return;
+
+            name = name.Trim();
+            if (value == null && _properties == null)
+                return;  // Don't need to remove if it doesn't exist
+
+            if (_properties == null)
+                _properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            if (value == null)
+            {
+                _properties.Remove(name);
+                return;
+            }
+
+            _properties[name] = value;
+
+            // If there is a Property on this Exception instance with this name, attempt to set its value
+            if (!_excludeObjectProperties.Contains(name))
+                this.PropertyValueSet(name, value);
+        }
+
+      #endregion
+
+        public override string ToString() => Summary;
     }
 }
